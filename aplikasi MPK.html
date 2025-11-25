@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3+ - Asisten Virtual MPK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #2a0000 0%, #600000 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #1a0000;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(139, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid #8B0000;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #8B0000 0%, #a00 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid #ff3333;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .logo-icon {
+            margin-right: 12px;
+            background: white;
+            color: #8B0000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+            font-weight: 300;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            min-width: 140px;
+            font-size: 0.95rem;
+        }
+        
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .mode-btn.active {
+            background: white;
+            color: #8B0000;
+            border-color: white;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+        }
+        
+        .login-section {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #444;
+        }
+        
+        .login-input {
+            padding: 10px 15px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            margin: 5px;
+            width: 200px;
+            font-size: 0.9rem;
+            background: #222;
+            color: white;
+        }
+        
+        .login-btn {
+            background: linear-gradient(to right, #8B0000, #a00);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 5px;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            background: linear-gradient(to right, #a00, #c00);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+        }
+        
+        .password-hint {
+            color: #ccc;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        
+        .chat-container {
+            background-color: #111;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px;
+            height: 350px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease-in;
+            word-wrap: break-word;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #8B0000 0%, #a00 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message {
+            background: #2a2a2a;
+            color: #eee;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            border-left: 3px solid #8B0000;
+        }
+        
+        .restricted-message {
+            background-color: #331111;
+            color: #ff6666;
+            border-left: 3px solid #ff3333;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        
+        .password-message {
+            background-color: #112211;
+            color: #66ff66;
+            border-left: 3px solid #33cc33;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        
+        .creator-message {
+            background-color: #1a1a2a;
+            color: #6699ff;
+            border-left: 3px solid #3366cc;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            max-width: 85%;
+            margin-right: auto;
+            background-color: #2a2a2a;
+            border-radius: 12px;
+            border-bottom-left-radius: 5px;
+            border-left: 3px solid #8B0000;
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background: #8B0000;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 3px;
+            opacity: 0.4;
+        }
+        
+        .typing-indicator span:nth-child(1) {
+            animation: typing 1s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation: typing 1s 0.2s infinite;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation: typing 1s 0.4s infinite;
+        }
+        
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); opacity: 1; }
+        }
+        
+        .input-area {
+            display: flex;
+            margin: 0 20px 20px;
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            background: #222;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        #user-input:focus {
+            border-color: #8B0000;
+            box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.2);
+        }
+        
+        #send-btn {
+            background: linear-gradient(to right, #8B0000, #a00);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        #send-btn:hover {
+            background: linear-gradient(to right, #a00, #c00);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 20px 15px;
+        }
+        
+        .action-btn {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            color: #ddd;
+        }
+        
+        .action-btn:hover {
+            background-color: #8B0000;
+            color: white;
+            border-color: #8B0000;
+            transform: translateY(-2px);
+        }
+        
+        .aspiration-btn {
+            background: linear-gradient(135deg, #8B0000 0%, #a00 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px auto;
+            width: fit-content;
+        }
+        
+        .aspiration-btn:hover {
+            background: linear-gradient(135deg, #a00 0%, #c00 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(139, 0, 0, 0.4);
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #333 0%, #555 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            margin: 5px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #555 0%, #777 100%);
+            transform: translateY(-2px);
+        }
+        
+        .member-features {
+            display: none;
+            margin: 0 20px 15px;
+        }
+        
+        .member-features h3 {
+            color: #ff6666;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .calculator-section {
+            display: none;
+            background-color: #1a0000;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 0 20px 20px;
+            border: 1px solid #333;
+        }
+        
+        .calculator-section h3 {
+            color: #ff6666;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .calculator-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .calculator-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #2a2a2a;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #ccc;
+            transition: all 0.3s;
+        }
+        
+        .calculator-tab.active {
+            background-color: #1a0000;
+            border-bottom: 2px solid #8B0000;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .calculator-tab:hover {
+            background-color: #333;
+        }
+        
+        .calculator-content {
+            display: none;
+        }
+        
+        .calculator-content.active {
+            display: block;
+        }
+        
+        .calculator-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .calc-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .calc-input-group label {
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ccc;
+        }
+        
+        .calc-input {
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            background: #222;
+            color: white;
+        }
+        
+        .calc-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .calc-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(to right, #8B0000, #a00);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .calc-btn:hover {
+            background: linear-gradient(to right, #a00, #c00);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+        }
+        
+        .calc-result {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            border-left: 3px solid #8B0000;
+            color: #eee;
+        }
+        
+        .currency-input {
+            position: relative;
+        }
+        
+        .currency-input::before {
+            content: "Rp";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-weight: bold;
+        }
+        
+        .currency-input input {
+            padding-left: 40px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #333;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1a0000;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #8B0000;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a00;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 12px;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .logo-icon {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .chat-container {
+                height: 300px;
+                padding: 12px;
+                margin: 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 10px 14px;
+            }
+            
+            .input-area {
+                flex-direction: column;
+                margin: 0 15px 15px;
+            }
+            
+            #send-btn {
+                padding: 12px;
+                margin-top: 8px;
+            }
+            
+            .login-input {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .login-btn {
+                width: 100%;
+                margin: 8px 0 0 0;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-btn {
+                width: 160px;
+            }
+            
+            .calculator-section {
+                margin: 0 15px 15px;
+                padding: 15px;
+            }
+            
+            .calc-buttons {
+                flex-direction: column;
+            }
+            
+            .aspiration-btn, .reset-btn {
+                width: 90%;
+                margin: 10px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">D3+</div>
+                <div>D3+ Asisten Virtual MPK</div>
+            </div>
+            <div class="tagline">Solusi Terpadu untuk Kebutuhan MPK dan Perwakilan Kelas</div>
+            
+            <div class="mode-selector">
+                <button class="mode-btn active" id="user-mode">Mode User</button>
+                <button class="mode-btn" id="member-mode">Mode Anggota MPK</button>
+            </div>
+            
+            <div class="login-section" id="login-section">
+                <input type="password" class="login-input" id="password-input" placeholder="Masukkan Password Anggota MPK">
+                <button class="login-btn" id="login-btn">Login</button>
+                <div class="password-hint">
+                    💡 Lupa password? Hubungi Tim Teknisi MPK jika anggota MPK
+                </div>
+            </div>
+        </header>
+        
+        <div class="chat-container" id="chat-container">
+            <div class="message bot-message">
+                <strong>Halo! Saya Asisten D3+.</strong> Silakan pilih mode di atas. Di <strong>Mode User</strong>, Anda bisa bertanya informasi umum seputar MPK. Di <strong>Mode Anggota</strong>, tersedia informasi lengkap untuk pengurus MPK.
+            </div>
+        </div>
+        
+        <div class="quick-actions" id="user-quick-actions">
+            <button class="action-btn" data-question="Apa itu MPK?">Apa itu MPK?</button>
+            <button class="action-btn" data-question="Tujuan MPK">Tujuan MPK</button>
+            <button class="action-btn" data-question="Cara daftar MPK">Cara Daftar</button>
+            <button class="action-btn" data-question="Cara menyampaikan aspirasi">Menyampaikan Aspirasi</button>
+            <button class="action-btn" data-question="Aspirasi itu apa">Apa itu Aspirasi?</button>
+            <button class="action-btn" data-question="Aspirasi yang diterima MPK">Aspirasi yang Diterima</button>
+            <button class="action-btn" data-question="Contoh-contoh aspirasi MPK">Contoh Aspirasi</button>
+            <button class="action-btn" data-question="Peran MPK saat pemilihan OSIS">Peran MPK di Pemilu OSIS</button>
+            <button class="action-btn" data-question="Keuntungan masuk MPK">Keuntungan Masuk MPK</button>
+            <button class="action-btn" data-question="Fungsi MPK">Fungsi MPK</button>
+        </div>
+        
+        <!-- Tombol Masukkan Aspirasi dan Reset untuk Mode User -->
+        <div id="user-special-buttons">
+            <button class="aspiration-btn" id="aspiration-btn">
+                <span>✍️</span> Masukkan Aspirasi
+            </button>
+            <button class="reset-btn" id="reset-chat-btn">
+                <span>↩️</span> Kembali ke Menu Awal
+            </button>
+        </div>
+        
+        <div class="member-features" id="member-features">
+            <h3>📚 Informasi Lengkap MPK (Mode Anggota)</h3>
+            <div class="quick-actions">
+                <button class="action-btn" data-question="Cara sidang MPK">Cara Sidang</button>
+                <button class="action-btn" data-question="Cara rapat MPK">Cara Rapat</button>
+                <button class="action-btn" data-question="Tugas ketua MPK">Tugas Ketua</button>
+                <button class="action-btn" data-question="Tugas wakil ketua MPK">Tugas Wakil</button>
+                <button class="action-btn" data-question="Tugas sekretaris MPK">Tugas Sekretaris</button>
+                <button class="action-btn" data-question="Tugas bendahara MPK">Tugas Bendahara</button>
+                <button class="action-btn" data-question="Tugas anggota MPK">Tugas Anggota</button>
+                <button class="action-btn" data-question="Apa itu komisi MPK">Apa itu Komisi</button>
+                <button class="action-btn" data-question="Jenis komisi MPK">Jenis Komisi</button>
+                <button class="action-btn" data-question="Cara membuat visi misi">Cara Buat Visi Misi</button>
+                <button class="action-btn" data-question="Yang dilakukan saat pemilihan OSIS">Tugas MPK di Pemilu OSIS</button>
+                <button class="action-btn" data-question="Program kerja MPK">Program Kerja MPK</button>
+                <button class="action-btn" data-question="Evaluasi MPK">Evaluasi MPK</button>
+                <button class="action-btn" data-question="Tata tertib MPK">Tata Tertib MPK</button>
+                <button class="action-btn" data-question="Cara membuat proposal">Cara Buat Proposal</button>
+                <button class="action-btn" data-question="Cara mengelola keuangan">Kelola Keuangan MPK</button>
+                <button class="action-btn" data-question="Cara dokumentasi kegiatan">Dokumentasi Kegiatan</button>
+                <button class="action-btn" data-question="Cara jadi bendahara MPK">Cara Jadi Bendahara</button>
+                <button class="action-btn" data-question="Struktur MPK">Struktur MPK</button>
+                <button class="action-btn" data-question="Konsekuensi menyalahgunakan jabatan">Konsekuensi Jabatan</button>
+                <button class="action-btn" data-question="Konsekuensi menyalahgunakan nama MPK">Konsekuensi Nama MPK</button>
+                <button class="action-btn" data-question="Mekanisme pengambilan keputusan">Mekanisme Keputusan</button>
+                <button class="action-btn" data-question="Cara membuat laporan kegiatan">Cara Buat Laporan</button>
+                <button class="action-btn" data-question="Cara evaluasi program kerja">Evaluasi Program Kerja</button>
+                <button class="action-btn" data-question="Peran MPK dalam pengambilan kebijakan">Peran MPK dalam Kebijakan</button>
+                <button class="action-btn" data-question="Hubungan MPK dengan OSIS">Hubungan MPK-OSIS</button>
+            </div>
+        </div>
+        
+        <div class="calculator-section" id="calculator-section">
+            <h3>🧮 Kalkulator MPK</h3>
+            <div class="calculator-tabs">
+                <button class="calculator-tab active" data-tab="basic-calc">Kalkulator Biasa</button>
+                <button class="calculator-tab" data-tab="treasurer-calc">Kalkulator Bendahara</button>
+            </div>
+            
+            <div class="calculator-content active" id="basic-calc">
+                <div class="calculator-inputs">
+                    <div class="calc-input-group">
+                        <label for="basic-num1">Angka Pertama</label>
+                        <input type="text" id="basic-num1" class="calc-input" placeholder="Masukkan angka pertama">
+                    </div>
+                    <div class="calc-input-group">
+                        <label for="basic-num2">Angka Kedua</label>
+                        <input type="text" id="basic-num2" class="calc-input" placeholder="Masukkan angka kedua">
+                    </div>
+                    <div class="calc-input-group">
+                        <label for="basic-operation">Operasi</label>
+                        <select id="basic-operation" class="calc-input">
+                            <option value="add">Penjumlahan (+)</option>
+                            <option value="subtract">Pengurangan (-)</option>
+                            <option value="multiply">Perkalian (×)</option>
+                            <option value="divide">Pembagian (÷)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="calc-buttons">
+                    <button class="calc-btn" id="basic-calculate">Hitung</button>
+                    <button class="calc-btn" id="basic-reset">Reset</button>
+                </div>
+                <div class="calc-result" id="basic-result">
+                    Hasil: 0
+                </div>
+            </div>
+            
+            <div class="calculator-content" id="treasurer-calc">
+                <div class="calculator-inputs">
+                    <div class="calc-input-group currency-input">
+                        <label for="calc-income">Pemasukan</label>
+                        <input type="text" id="calc-income" class="calc-input" placeholder="0">
+                    </div>
+                    <div class="calc-input-group currency-input">
+                        <label for="calc-expense">Pengeluaran</label>
+                        <input type="text" id="calc-expense" class="calc-input" placeholder="0">
+                    </div>
+                    <div class="calc-input-group currency-input">
+                        <label for="calc-balance">Saldo Awal</label>
+                        <input type="text" id="calc-balance" class="calc-input" placeholder="0">
+                    </div>
+                </div>
+                <div class="calc-buttons">
+                    <button class="calc-btn" id="calc-calculate">Hitung Saldo</button>
+                    <button class="calc-btn" id="calc-reset">Reset</button>
+                </div>
+                <div class="calc-result" id="calc-result">
+                    Saldo: Rp 0
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Ketik pertanyaan untuk D3+...">
+            <button id="send-btn">Kirim</button>
+        </div>
+        
+        <footer>
+            <p>D3+ Asisten Virtual MPK &copy; 2026 - Diciptakan oleh D3+ Anggota MPK</p>
+        </footer>
+    </div>
+
+    <script>
+        // Kode JavaScript yang disederhanakan
+        let currentMode = 'user';
+        let isLoggedIn = false;
+        const MEMBER_PASSWORD = 'MPK123456789123456789D3+';
+
+        // Responses untuk Mode User (Terbatas)
+        const userResponses = {
+            "apa itu mpk": `
+                <h4>🏛️ Pengertian MPK</h4>
+                <p><strong>Majelis Perwakilan Kelas (MPK)</strong> adalah lembaga perwakilan siswa di sekolah yang bertugas menampung aspirasi dan mengawasi kegiatan OSIS.</p>
+                <p><strong>Fungsi Utama MPK:</strong></p>
+                <ul>
+                    <li>Sebagai lembaga legislatif sekolah</li>
+                    <li>Menampung dan menyalurkan aspirasi siswa</li>
+                    <li>Mengawasi kinerja OSIS</li>
+                </ul>
+            `,
+            "tujuan mpk": `
+                <h4>🎯 Tujuan MPK</h4>
+                <p><strong>Tujuan utama MPK:</strong></p>
+                <ul>
+                    <li>Mewadahi Aspirasi siswa</li>
+                    <li>Meningkatkan partisipasi siswa</li>
+                    <li>Membangun lingkungan sekolah yang demokratis</li>
+                    <li>Mengawasi dan mengevaluasi kinerja OSIS</li>
+                </ul>
+            `,
+            "cara daftar mpk": `
+                <h4>📝 Cara Mendaftar MPK</h4>
+                <p>Untuk mendaftar menjadi anggota MPK, silakan:</p>
+                <ol>
+                    <li>Pantau pengumuman pendaftaran di mading sekolah</li>
+                    <li>Penuhi persyaratan yang ditetapkan</li>
+                    <li>Hubungi pembina OSIS/MPK untuk informasi lebih lanjut</li>
+                </ol>
+            `,
+            "cara menyampaikan aspirasi": `
+                <h4>💬 Cara Menyampaikan Aspirasi</h4>
+                <p>Anda dapat menyampaikan aspirasi melalui:</p>
+                <ul>
+                    <li>Kotak Saran di sekretariat OSIS/MPK</li>
+                    <li>Perwakilan kelas Anda</li>
+                    <li>Media sosial resmi MPK sekolah</li>
+                    <li>Forum aspirasi yang diadakan MPK</li>
+                    <li>Surat langsung kepada pengurus MPK</li>
+                </ul>
+                <p><strong>Tips menyampaikan aspirasi:</strong></p>
+                <ul>
+                    <li>Sampaikan dengan sopan dan jelas</li>
+                    <li>Berikan alasan yang logis</li>
+                    <li>Usulkan solusi jika memungkinkan</li>
+                    <li>Pastikan aspirasi bermanfaat untuk banyak orang</li>
+                </ul>
+            `,
+            "aspirasi itu apa": `
+                <h4>💡 Apa itu Aspirasi?</h4>
+                <p><strong>Aspirasi</strong> adalah harapan, keinginan, atau pendapat yang disampaikan oleh siswa untuk perbaikan sekolah.</p>
+                <p><strong>Ciri-ciri aspirasi yang baik:</strong></p>
+                <ul>
+                    <li>Membangun dan positif</li>
+                    <li>Menyangkut kepentingan bersama</li>
+                    <li>Dapat diwujudkan</li>
+                    <li>Disampaikan dengan cara yang baik</li>
+                </ul>
+                <p>Aspirasi berbeda dengan keluhan. Aspirasi berfokus pada solusi, bukan hanya masalah.</p>
+            `,
+            "aspirasi yang diterima mpk": `
+                <h4>✅ Aspirasi yang Diterima MPK</h4>
+                <p>MPK menerima berbagai jenis aspirasi, antara lain:</p>
+                <ul>
+                    <li><strong>Kebijakan Sekolah</strong> - Usulan perbaikan tata tertib atau aturan</li>
+                    <li><strong>Fasilitas Sekolah</strong> - Permintaan perbaikan atau penambahan fasilitas</li>
+                    <li><strong>Kegiatan Siswa</strong> - Ide untuk kegiatan ekstrakurikuler atau event</li>
+                    <li><strong>Kualitas Pembelajaran</strong> - Saran untuk metode belajar yang lebih baik</li>
+                    <li><strong>Kesejahteraan Siswa</strong> - Masalah yang mempengaruhi kenyamanan belajar</li>
+                </ul>
+                <p><strong>Aspirasi yang tidak dapat diterima:</strong></p>
+                <ul>
+                    <li>Bersifat pribadi dan tidak menyangkut kepentingan umum</li>
+                    <li>Mengandung unsur SARA</li>
+                    <li>Berisi celaan atau hinaan</li>
+                    <li>Tidak disampaikan dengan sopan</li>
+                </ul>
+            `,
+            "contoh-contoh aspirasi mpk": `
+                <h4>📋 Contoh Aspirasi untuk MPK</h4>
+                <p>Berikut beberapa contoh aspirasi yang bisa disampaikan ke MPK:</p>
+                
+                <p><strong>1. Fasilitas Sekolah</strong></p>
+                <ul>
+                    <li>"Mohon perbaikan toilet di lantai 2 yang sering mampet"</li>
+                    <li>"Usulan penambahan tempat sampah di area parkir"</li>
+                    <li>"Permintaan perbaikan AC di perpustakaan"</li>
+                </ul>
+                
+                <p><strong>2. Kegiatan Siswa</strong></p>
+                <ul>
+                    <li>"Usulan diadakan lomba debat antar kelas"</li>
+                    <li>"Permintaan ekstrakurikuler coding untuk siswa"</li>
+                    <li>"Ide festival budaya untuk merayakan keberagaman"</li>
+                </ul>
+                
+                <p><strong>3. Kebijakan Sekolah</strong></p>
+                <ul>
+                    <li>"Usulan perpanjangan waktu istirahat 5 menit"</li>
+                    <li>"Permintaan kebijakan seragam yang lebih fleksibel saat cuaca panas"</li>
+                    <li>"Saran sistem perpustakaan digital"</li>
+                </ul>
+                
+                <p><strong>4. Kualitas Pembelajaran</strong></p>
+                <ul>
+                    <li>"Usulan tambahan jam pelajaran untuk mata pelajaran tertentu"</li>
+                    <li>"Permintaan akses wifi yang lebih stabil untuk keperluan belajar"</li>
+                    <li>"Saran metode belajar yang lebih interaktif"</li>
+                </ul>
+            `,
+            "peran mpk saat pemilihan osis": `
+                <h4>🗳️ Peran MPK dalam Pemilihan OSIS</h4>
+                <p>MPK memiliki peran penting dalam pemilihan OSIS, antara lain:</p>
+                <ul>
+                    <li>Mengawasi proses pemilihan OSIS agar berjalan adil dan transparan</li>
+                    <li>Memverifikasi calon ketua dan wakil ketua OSIS</li>
+                    <li>Menjadi panitia pemilihan OSIS bersama dengan pengurus OSIS</li>
+                    <li>Mengawasi kampanye agar sesuai dengan aturan</li>
+                    <li>Menghitung suara dan mengumumkan hasil pemilihan</li>
+                </ul>
+            `,
+            "keuntungan masuk mpk": `
+                <h4>🌟 Keuntungan Masuk MPK</h4>
+                <p>Bergabung dengan MPK memberikan banyak keuntungan, di antaranya:</p>
+                <ul>
+                    <li>Mengembangkan kemampuan kepemimpinan</li>
+                    <li>Belajar berorganisasi dan membuat keputusan</li>
+                    <li>Memperluas jaringan pertemanan</li>
+                    <li>Membantu menyampaikan aspirasi siswa</li>
+                    <li>Pengalaman berharga untuk masa depan</li>
+                </ul>
+            `,
+            "fungsi mpk": `
+                <h4>⚖️ Fungsi MPK</h4>
+                <p>MPK memiliki beberapa fungsi utama:</p>
+                <ul>
+                    <li><strong>Legislatif</strong> - Membuat dan menetapkan peraturan</li>
+                    <li><strong>Pengawasan</strong> - Mengawasi kinerja OSIS</li>
+                    <li><strong>Aspiratif</strong> - Menampung dan menyalurkan aspirasi siswa</li>
+                    <li><strong>Mediasi</strong> - Menjadi penghubung antara siswa dan pihak sekolah</li>
+                </ul>
+            `,
+            "siapa pencipta d3+": `
+                <div class="creator-message">
+                    <h4>👥 Pencipta D3+ Asisten Virtual MPK</h4>
+                    <p><strong>D3+ diciptakan oleh:</strong></p>
+                    <ul>
+                        <li><strong>Dina</strong> - Pengembang Utama & Desainer UI/UX</li>
+                        <li><strong>Dandi</strong> - Analisis Sistem & Konten MPK</li>
+                        <li><strong>Djusuf</strong> - Teknisi & Pengembang Backend</li>
+                    </ul>
+                    <p>D3+ didukung sepenuhnya oleh <strong>Majelis Perwakilan Kelas (MPK)</strong> untuk memberikan solusi terbaik bagi seluruh siswa.</p>
+                    <p>Tim D3+ berkomitmen untuk terus mengembangkan asisten virtual ini agar semakin bermanfaat bagi komunitas sekolah.</p>
+                </div>
+            `,
+            "pencipta d3+": `
+                <div class="creator-message">
+                    <h4>👥 Pencipta D3+ Asisten Virtual MPK</h4>
+                    <p><strong>D3+ diciptakan oleh:</strong></p>
+                    <ul>
+                        <li><strong>Dina</strong> - Pengembang Utama & Desainer UI/UX</li>
+                        <li><strong>Dandi</strong> - Analisis Sistem & Konten MPK</li>
+                        <li><strong>Djusuf</strong> - Teknisi & Pengembang Backend</li>
+                    </ul>
+                    <p>D3+ didukung sepenuhnya oleh <strong>Majelis Perwakilan Kelas (MPK)</strong> untuk memberikan solusi terbaik bagi seluruh siswa.</p>
+                </div>
+            `,
+            "pembuat d3+": `
+                <div class="creator-message">
+                    <h4>👥 Pencipta D3+ Asisten Virtual MPK</h4>
+                    <p><strong>D3+ diciptakan oleh:</strong></p>
+                    <ul>
+                        <li><strong>Dina</strong> - Pengembang Utama & Desainer UI/UX</li>
+                        <li><strong>Dandi</strong> - Analisis Sistem & Konten MPK</li>
+                        <li><strong>Djusuf</strong> - Teknisi & Pengembang Backend</li>
+                    </ul>
+                    <p>D3+ didukung sepenuhnya oleh <strong>Majelis Perwakilan Kelas (MPK)</strong> untuk memberikan solusi terbaik bagi seluruh siswa.</p>
+                </div>
+            `,
+            "dina dandi djusuf": `
+                <div class="creator-message">
+                    <h4>👥 Pencipta D3+ Asisten Virtual MPK</h4>
+                    <p><strong>D3+ diciptakan oleh:</strong></p>
+                    <ul>
+                        <li><strong>Dina</strong> - Pengembang Utama & Desainer UI/UX</li>
+                        <li><strong>Dandi</strong> - Analisis Sistem & Konten MPK</li>
+                        <li><strong>Djusuf</strong> - Teknisi & Pengembang Backend</li>
+                    </ul>
+                    <p>D3+ didukung sepenuhnya oleh <strong>Majelis Perwakilan Kelas (MPK)</strong> untuk memberikan solusi terbaik bagi seluruh siswa.</p>
+                </div>
+            `,
+            "default": `
+                <p>Saya Asisten D3+ siap membantu! Silakan pilih pertanyaan dari tombol di atas.</p>
+                <p>Untuk informasi lebih detail, hubungi pengurus MPK langsung.</p>
+            `
+        };
+
+        // Responses untuk Mode Anggota (Lengkap)
+        const memberResponses = {
+            "cara sidang mpk": `
+                <h4>⚖️ Cara Sidang MPK yang Efektif</h4>
+                <p><strong>Strategi untuk melaksanakan sidang MPK yang efektif:</strong></p>
+                <ol>
+                    <li><strong>Persiapan Matang</strong>
+                        <ul>
+                            <li>Siapkan agenda sidang 1 minggu sebelumnya</li>
+                            <li>Kirim materi sidang kepada semua anggota</li>
+                            <li>Konfirmasi kehadiran anggota</li>
+                        </ul>
+                    </li>
+                    <li><strong>Struktur Sidang yang Jelas</strong>
+                        <ul>
+                            <li>Bagi waktu untuk setiap agenda</li>
+                            <li>Prioritaskan agenda penting di awal sidang</li>
+                        </ul>
+                    </li>
+                </ol>
+            `,
+            "cara rapat mpk": `
+                <h4>🤝 Teknik Rapat yang Produktif</h4>
+                <p><strong>Tips untuk meningkatkan produktivitas rapat MPK:</strong></p>
+                <ol>
+                    <li><strong>Perencanaan yang Tepat</strong>
+                        <ul>
+                            <li>Tetapkan tujuan rapat yang spesifik</li>
+                            <li>Buat agenda yang terstruktur</li>
+                            <li>Tentukan durasi rapat</li>
+                        </ul>
+                    </li>
+                    <li><strong>Persiapan Peserta</strong>
+                        <ul>
+                            <li>Kirim materi rapat sebelumnya</li>
+                            <li>Minta peserta membaca materi sebelum rapat</li>
+                        </ul>
+                    </li>
+                </ol>
+            `,
+            "tugas ketua mpk": `
+                <h4>👑 Tugas Ketua MPK</h4>
+                <p><strong>Tanggung Jawab Utama:</strong></p>
+                <ul>
+                    <li>Memimpin rapat dan sidang MPK</li>
+                    <li>Mengkoordinasi seluruh pengurus MPK</li>
+                    <li>Mewakili MPK dalam forum resmi</li>
+                    <li>Menandatangani surat resmi MPK</li>
+                    <li>Mengawasi pelaksanaan program kerja MPK</li>
+                </ul>
+            `,
+            "tugas wakil ketua mpk": `
+                <h4>👥 Tugas Wakil Ketua MPK</h4>
+                <p><strong>Tanggung Jawab Utama:</strong></p>
+                <ul>
+                    <li>Menggantikan ketua saat berhalangan</li>
+                    <li>Membantu ketua dalam tugas-tugasnya</li>
+                    <li>Mengkoordinasi bidang-bidang MPK</li>
+                    <li>Memimpin rapat jika ketua berhalangan</li>
+                </ul>
+            `,
+            "tugas sekretaris mpk": `
+                <h4>📝 Tugas Sekretaris MPK</h4>
+                <p><strong>Tanggung Jawab Utama:</strong></p>
+                <ul>
+                    <li>Mencatat semua kegiatan rapat dan sidang MPK</li>
+                    <li>Mengurus surat-menyurat dan dokumentasi MPK</li>
+                    <li>Menyimpan arsip dan data MPK</li>
+                    <li>Membuat notulensi rapat dan menyebarkannya kepada anggota</li>
+                    <li>Membantu ketua dalam menyusun laporan kegiatan</li>
+                    <li>Mengelola agenda dan jadwal kegiatan MPK</li>
+                </ul>
+            `,
+            "tugas bendahara mpk": `
+                <h4>💰 Tugas Bendahara MPK</h4>
+                <p><strong>Tanggung Jawab Utama:</strong></p>
+                <ul>
+                    <li>Mengelola keuangan MPK (pemasukan dan pengeluaran)</li>
+                    <li>Membuat proposal anggaran untuk setiap kegiatan</li>
+                    <li>Mencatat setiap transaksi keuangan dengan teliti</li>
+                    <li>Membuat laporan keuangan secara berkala</li>
+                    <li>Bertanggung jawab dalam penggalangan dana jika diperlukan</li>
+                    <li>Menyiapkan laporan keuangan untuk audit</li>
+                </ul>
+            `,
+            "tugas anggota mpk": `
+                <h4>👥 Tugas Anggota MPK</h4>
+                <p><strong>Tanggung Jawab Utama:</strong></p>
+                <ul>
+                    <li>Menampung dan menyampaikan aspirasi dari kelas yang diwakili</li>
+                    <li>Berpartisipasi aktif dalam rapat-rapat MPK</li>
+                    <li>Mengawasi kinerja pengurus harian MPK dan OSIS</li>
+                    <li>Memberikan suara dalam pengambilan keputusan</li>
+                    <li>Menyampaikan laporan hasil rapat MPK kepada kelasnya</li>
+                    <li>Mengikuti kegiatan yang diselenggarakan oleh MPK</li>
+                </ul>
+            `,
+            "apa itu komisi mpk": `
+                <h4>🏛️ Apa itu Komisi MPK?</h4>
+                <p><strong>Komisi MPK</strong> adalah bagian dari struktur MPK yang dibentuk untuk menangani bidang-bidang tertentu. Komisi bertugas:</p>
+                <ul>
+                    <li>Melakukan pengkajian dan pembahasan masalah di bidangnya</li>
+                    <li>Menyiapkan bahan-bahan untuk sidang paripurna</li>
+                    <li>Melakukan pengawasan terhadap pelaksanaan keputusan MPK di bidangnya</li>
+                    <li>Menyusun rancangan peraturan dan program kerja di bidangnya</li>
+                </ul>
+                <p>Komisi biasanya dibentuk berdasarkan bidang-bidang tertentu seperti Komisi Aspirasi, Komisi Pengawasan, dll.</p>
+            `,
+            "jenis komisi mpk": `
+                <h4>📊 Jenis-Jenis Komisi di MPK</h4>
+                <p>MPK dapat membentuk beberapa komisi, antara lain:</p>
+                <ul>
+                    <li><strong>Komisi Aspirasi</strong> - Menampung dan menyalurkan aspirasi siswa</li>
+                    <li><strong>Komisi Pengawasan</strong> - Mengawasi kinerja OSIS dan program kerjanya</li>
+                    <li><strong>Komisi Peraturan</strong> - Membuat dan merevisi peraturan organisasi</li>
+                    <li><strong>Komisi Pemilihan</strong> - Mengawasi dan melaksanakan pemilihan OSIS</li>
+                    <li><strong>Komisi Kesejahteraan</strong> - Memperhatikan kesejahteraan siswa</li>
+                </ul>
+                <p>Pembentukan komisi disesuaikan dengan kebutuhan dan kondisi sekolah.</p>
+            `,
+            "cara membuat visi misi": `
+                <h4>🎯 Cara Membuat Visi Misi yang Efektif</h4>
+                <p>Berikut adalah langkah-langkah membuat visi misi untuk MPK atau OSIS:</p>
+                <ol>
+                    <li><strong>Visi</strong>
+                        <ul>
+                            <li>Visi harus mencerminkan tujuan jangka panjang</li>
+                            <li>Gambarkan kondisi ideal yang ingin dicapai</li>
+                            <li>Buatlah visi yang inspiratif dan mudah diingat</li>
+                        </ul>
+                    </li>
+                    <li><strong>Misi</strong>
+                        <ul>
+                            <li>Misi adalah langkah-langkah untuk mencapai visi</li>
+                            <li>Uraikan menjadi poin-poin yang jelas dan terukur</li>
+                            <li>Pastikan misi dapat dilaksanakan</li>
+                        </ul>
+                    </li>
+                </ol>
+            `,
+            "yang dilakukan saat pemilihan osis": `
+                <h4>📋 Tugas MPK Saat Pemilihan OSIS</h4>
+                <p>MPK memiliki tanggung jawab sebagai berikut selama pemilihan OSIS:</p>
+                <ul>
+                    <li>Membentuk panitia pemilihan OSIS</li>
+                    <li>Menetapkan tata cara pemilihan</li>
+                    <li>Mengawasi proses kampanye</li>
+                    <li>Mengawasi jalannya pemungutan suara</li>
+                    <li>Melakukan penghitungan suara</li>
+                    <li>Mengumumkan hasil pemilihan</li>
+                    <li>Menjadi mediator jika ada sengketa</li>
+                </ul>
+            `,
+            "program kerja mpk": `
+                <h4>📅 Program Kerja MPK</h4>
+                <p>Program kerja MPK meliputi:</p>
+                <ul>
+                    <li>Rapat rutin MPK</li>
+                    <li>Pemilihan OSIS</li>
+                    <li>Forum aspirasi siswa</li>
+                    <li>Evaluasi kinerja OSIS</li>
+                    <li>Pelatihan untuk anggota MPK</li>
+                    <li>Kegiatan sosial dan bakti sosial</li>
+                </ul>
+            `,
+            "evaluasi mpk": `
+                <h4>📊 Evaluasi Kinerja MPK</h4>
+                <p>Evaluasi MPK dilakukan untuk meningkatkan kinerja, meliputi:</p>
+                <ul>
+                    <li>Evaluasi program kerja</li>
+                    <li>Evaluasi partisipasi anggota</li>
+                    <li>Evaluasi kepemimpinan</li>
+                    <li>Feedback dari siswa dan pihak sekolah</li>
+                    <li>Rekomendasi perbaikan untuk periode berikutnya</li>
+                </ul>
+            `,
+            "tata tertib mpk": `
+                <h4>📜 Tata Tertib MPK</h4>
+                <p>Beberapa poin tata tertib MPK:</p>
+                <ul>
+                    <li>Kehadiran dalam rapat minimal 80%</li>
+                    <li>Menjaga etika dan sopan santun selama rapat</li>
+                    <li>Menyampaikan aspirasi dengan baik dan benar</li>
+                    <li>Menjaga kerahasiaan informasi internal</li>
+                    <li>Mematuhi AD/ART MPK</li>
+                </ul>
+            `,
+            "cara membuat proposal": `
+                <h4>📄 Cara Membuat Proposal Kegiatan</h4>
+                <p>Langkah-langkah membuat proposal kegiatan MPK:</p>
+                <ol>
+                    <li>Judul kegiatan yang jelas</li>
+                    <li>Latar belakang dan tujuan</li>
+                    <li>Waktu dan tempat pelaksanaan</li>
+                    <li>Susunan panitia</li>
+                    <li>Rencana anggaran biaya</li>
+                    <li>Jadwal pelaksanaan</li>
+                    <li>Penutup dan lampiran</li>
+                </ol>
+            `,
+            "cara mengelola keuangan": `
+                <h4>💰 Cara Mengelola Keuangan MPK</h4>
+                <p>Tips mengelola keuangan MPK dengan baik:</p>
+                <ul>
+                    <li>Buat pembukuan yang rapi dan transparan</li>
+                    <li>Pisahkan uang kas dari uang pribadi</li>
+                    <li>Selalu minta kwitansi untuk setiap pengeluaran</li>
+                    <li>Laporkan keuangan secara berkala</li>
+                    <li>Audit keuangan di akhir periode</li>
+                </ul>
+            `,
+            "cara dokumentasi kegiatan": `
+                <h4>📸 Cara Mendokumentasikan Kegiatan</h4>
+                <p>Tips untuk mendokumentasikan kegiatan MPK:</p>
+                <ul>
+                    <li>Tentukan orang yang bertanggung jawab untuk dokumentasi</li>
+                    <li>Gunakan kamera dengan kualitas yang baik</li>
+                    <li>Ambil foto dari berbagai sudut dan momen penting</li>
+                    <li>Simpan file dengan nama yang terorganisir</li>
+                    <li>Buat laporan kegiatan dengan foto sebagai bukti</li>
+                </ul>
+            `,
+            "cara jadi bendahara mpk": `
+                <h4>💰 Cara Menjadi Bendahara MPK (Versi Lengkap)</h4>
+                <p><strong>Proses Menjadi Bendahara MPK:</strong></p>
+                <ol>
+                    <li>Menjadi anggota MPK aktif minimal 1 semester</li>
+                    <li>Memiliki rekam jejak yang baik dalam organisasi</li>
+                    <li>Mengajukan diri atau dicalonkan oleh anggota lain</li>
+                    <li>Mengikuti proses seleksi dan wawancara</li>
+                    <li>Mendapatkan persetujuan mayoritas anggota MPK</li>
+                    <li>Dilantik secara resmi oleh pembina MPK</li>
+                </ol>
+                <p><strong>Kualifikasi Khusus Bendahara:</strong></p>
+                <ul>
+                    <li>Memahami dasar-dasar akuntansi</li>
+                    <li>Mampu menggunakan spreadsheet untuk pencatatan</li>
+                    <li>Jujur, teliti, dan transparan</li>
+                    <li>Mampu membuat laporan keuangan berkala</li>
+                </ul>
+                <p><strong>Tanggung Jawab Bendahara:</strong></p>
+                <ul>
+                    <li>Mengelola kas MPK</li>
+                    <li>Mencatat semua pemasukan dan pengeluaran</li>
+                    <li>Membuat proposal anggaran kegiatan</li>
+                    <li>Melaporkan keuangan secara rutin</li>
+                    <li>Bertanggung jawab atas audit keuangan</li>
+                </ul>
+            `,
+            "struktur mpk": `
+                <h4>🏛️ Struktur Organisasi MPK</h4>
+                <p>MPK memiliki struktur organisasi yang jelas untuk menjalankan fungsinya:</p>
+                
+                <p><strong>1. Pimpinan MPK</strong></p>
+                <ul>
+                    <li><strong>Ketua MPK</strong> - Memimpin rapat dan sidang MPK</li>
+                    <li><strong>Wakil Ketua MPK</strong> - Membantu ketua dan menggantikan saat berhalangan</li>
+                </ul>
+                
+                <p><strong>2. Sekretariat</strong></p>
+                <ul>
+                    <li><strong>Sekretaris</strong> - Mengurus administrasi dan dokumentasi</li>
+                    <li><strong>Bendahara</strong> - Mengelola keuangan MPK</li>
+                </ul>
+                
+                <p><strong>3. Bidang-bidang Khusus</strong></p>
+                <ul>
+                    <li><strong>Bidang Aspirasi</strong> - Menampung dan menyalurkan aspirasi siswa</li>
+                    <li><strong>Bidang Pengawasan</strong> - Mengawasi kinerja OSIS</li>
+                    <li><strong>Bidang Hubungan Masyarakat</strong> - Menjadi penghubung dengan pihak sekolah dan siswa</li>
+                </ul>
+                
+                <p><strong>4. Anggota Biasa</strong></p>
+                <ul>
+                    <li>Perwakilan dari setiap kelas</li>
+                    <li>Berpartisipasi dalam rapat dan pengambilan keputusan</li>
+                </ul>
+            `,
+            "konsekuensi menyalahgunakan jabatan": `
+                <h4>⚖️ Konsekuensi Menyalahgunakan Jabatan di MPK (Versi Lengkap)</h4>
+                <p><strong>Sanksi Organisasi:</strong></p>
+                <ul>
+                    <li>Peringatan lisan (untuk pelanggaran ringan)</li>
+                    <li>Peringatan tertulis (pelanggaran sedang)</li>
+                    <li>Penangguhan jabatan sementara (1-3 bulan)</li>
+                    <li>Pemberhentian dari jabatan (pelanggaran berat)</li>
+                    <li>Pencabutan keanggotaan MPK (pelanggaran sangat berat)</li>
+                </ul>
+                <p><strong>Sanksi Akademik:</strong></p>
+                <ul>
+                    <li>Pemanggilan oleh guru pembina</li>
+                    <li>Pemberitahuan kepada wali kelas dan orang tua</li>
+                    <li>Pembatasan mengikuti kegiatan ekstrakurikuler</li>
+                    <li>Pengurangan nilai sikap</li>
+                </ul>
+                <p><strong>Konsekuensi Hukum:</strong></p>
+                <ul>
+                    <li>Pelaporan kepada pihak berwajib untuk tindak pidana</li>
+                    <li>Proses hukum sesuai ketentuan yang berlaku</li>
+                    <li>Ganti rugi materiil jika ada kerugian finansial</li>
+                </ul>
+                <p><strong>Contoh Penyalahgunaan Jabatan:</strong></p>
+                <ul>
+                    <li>Korupsi dana organisasi</li>
+                    <li>Memanipulasi hasil pemilihan</li>
+                    <li>Menggunakan fasilitas sekolah untuk kepentingan pribadi</li>
+                    <li>Memeras atau menerima suap</li>
+                </ul>
+            `,
+            "konsekuensi menyalahgunakan nama mpk": `
+                <h4>🚫 Konsekuensi Menyalahgunakan Nama MPK (Versi Lengkap)</h4>
+                <p><strong>Sanksi Disiplin Sekolah:</strong></p>
+                <ul>
+                    <li>Skorsing 1-3 hari (pelanggaran ringan)</li>
+                    <li>Skorsing 1 minggu (pelanggaran sedang)</li>
+                    <li>Skorsing 2 minggu atau lebih (pelanggaran berat)</li>
+                    <li>Pemanggilan orang tua dan komite sekolah</li>
+                </ul>
+                <p><strong>Sanksi Organisasi:</strong></p>
+                <ul>
+                    <li>Pencabutan keanggotaan MPK secara permanen</li>
+                    <li>Larangan mengikuti organisasi sekolah selama 1 tahun</li>
+                    <li>Pemberitahuan resmi kepada seluruh warga sekolah</li>
+                </ul>
+                <p><strong>Konsekuensi Hukum:</strong></p>
+                <ul>
+                    <li>Tuntutan pidana penipuan (Pasal 378 KUHP)</li>
+                    <li>Tuntutan pemalsuan surat (Pasal 263 KUHP)</li>
+                    <li>Gugatan perdata atas kerugian materi</li>
+                </ul>
+                <p><strong>Contoh Penyalahgunaan Nama MPK:</strong></p>
+                <ul>
+                    <li>Menggunakan nama MPK untuk mengumpulkan dana tanpa izin</li>
+                    <li>Memalsukan surat izin kegiatan</li>
+                    <li>Mengatasnamakan MPK untuk kepentingan bisnis pribadi</li>
+                    <li>Membuat pernyataan palsu atas nama MPK</li>
+                </ul>
+            `,
+            "mekanisme pengambilan keputusan": `
+                <h4>⚖️ Mekanisme Pengambilan Keputusan di MPK</h4>
+                <p>MPK menggunakan mekanisme musyawarah dan mufakat dalam pengambilan keputusan. Prosesnya:</p>
+                <ol>
+                    <li><strong>Pembahasan</strong> - Masalah dibahas secara terbuka dalam rapat</li>
+                    <li><strong>Musyawarah</strong> - Anggota menyampaikan pendapat dan usulan</li>
+                    <li><strong>Mufakat</strong> - Diupayakan mencapai kesepakatan bersama</li>
+                    <li><strong>Voting</strong> - Jika mufakat tidak tercapai, dilakukan voting</li>
+                    <li><strong>Keputusan</strong> - Keputusan diambil berdasarkan suara terbanyak</li>
+                </ol>
+                <p>Setiap keputusan harus dicatat dalam notulensi rapat dan disampaikan kepada semua anggota.</p>
+            `,
+            "cara membuat laporan kegiatan": `
+                <h4>📄 Cara Membuat Laporan Kegiatan</h4>
+                <p>Laporan kegiatan MPK harus dibuat setelah suatu kegiatan selesai dilaksanakan. Berikut cara membuatnya:</p>
+                <ol>
+                    <li><strong>Bagian Pembuka</strong>
+                        <ul>
+                            <li>Judul laporan</li>
+                            <li>Waktu dan tempat kegiatan</li>
+                            <li>Tujuan kegiatan</li>
+                        </ul>
+                    </li>
+                    <li><strong>Isi Laporan</strong>
+                        <ul>
+                            <li>Pelaksanaan kegiatan (rincian acara)</li>
+                            <li>Hasil yang dicapai</li>
+                            <li>Kendala yang dihadapi</li>
+                            <li>Dokumentasi (foto, surat, dll)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Penutup</strong>
+                        <ul>
+                            <li>Kesimpulan</li>
+                            <li>Saran untuk kegiatan berikutnya</li>
+                        </ul>
+                    </li>
+                </ol>
+                <p>Laporan harus ditandatangani oleh penanggung jawab kegiatan dan ketua MPK.</p>
+            `,
+            "cara evaluasi program kerja": `
+                <h4>📈 Cara Evaluasi Program Kerja MPK</h4>
+                <p>Evaluasi program kerja MPK dilakukan untuk meningkatkan kualitas kerja. Langkah-langkahnya:</p>
+                <ol>
+                    <li><strong>Pengumpulan Data</strong> - Kumpulkan data pelaksanaan program</li>
+                    <li><strong>Analisis Pencapaian</strong> - Bandingkan hasil dengan target</li>
+                    <li><strong>Identifikasi Masalah</strong> - Temukan kendala dan kekurangan</li>
+                    <li><strong>Mencari Solusi</strong> - Cari cara untuk perbaikan</li>
+                    <li><strong>Rekomendasi</strong> - Buat rekomendasi untuk program berikutnya</li>
+                </ol>
+                <p>Evaluasi sebaiknya melibatkan semua anggota MPK dan dilakukan secara terbuka.</p>
+            `,
+            "peran mpk dalam pengambilan kebijakan": `
+                <h4>🏛️ Peran MPK dalam Pengambilan Kebijakan Sekolah</h4>
+                <p>MPK memiliki peran penting dalam pengambilan kebijakan di sekolah, antara lain:</p>
+                <ul>
+                    <li><strong>Legislasi</strong> - Membuat dan menetapkan peraturan yang mengikat OSIS</li>
+                    <li><strong>Aspirasi</strong> - Menyampaikan aspirasi siswa dalam pembuatan kebijakan sekolah</li>
+                    <li><strong>Pengawasan</strong> - Mengawasi pelaksanaan kebijakan oleh OSIS dan pihak sekolah</li>
+                    <li><strong>Evaluasi</strong> - Mengevaluasi dampak kebijakan terhadap siswa</li>
+                    <li><strong>Mediasi</strong> - Menjadi perantara antara siswa dan pihak sekolah dalam masalah kebijakan</li>
+                </ul>
+            `,
+            "hubungan mpk dengan osis": `
+                <h4>🤝 Hubungan MPK dengan OSIS</h4>
+                <p>MPK dan OSIS memiliki hubungan yang saling melengkapi dalam organisasi sekolah:</p>
+                
+                <p><strong>1. Fungsi yang Berbeda</strong></p>
+                <ul>
+                    <li><strong>MPK</strong> - Lembaga legislatif yang membuat peraturan dan mengawasi OSIS</li>
+                    <li><strong>OSIS</strong> - Lembaga eksekutif yang melaksanakan program kerja</li>
+                </ul>
+                
+                <p><strong>2. Kerja Sama</strong></p>
+                <ul>
+                    <li>MPK dan OSIS bekerja sama dalam menyelenggarakan kegiatan sekolah</li>
+                    <li>MPK memberikan persetujuan terhadap program kerja OSIS</li>
+                    <li>OSIS melaporkan pelaksanaan program kerja kepada MPK</li>
+                </ul>
+                
+                <p><strong>3. Pengawasan</strong></p>
+                <ul>
+                    <li>MPK mengawasi kinerja OSIS</li>
+                    <li>MPK dapat memberikan saran dan masukan kepada OSIS</li>
+                    <li>MPK mengevaluasi program kerja OSIS</li>
+                </ul>
+            `,
+            "siapa pencipta d3+": `
+                <div class="creator-message">
+                    <h4>👥 Pencipta D3+ Asisten Virtual MPK</h4>
+                    <p><strong>D3+ diciptakan oleh:</strong></p>
+                    <ul>
+                        <li><strong>Dina</strong> - Pengembang Utama & Desainer UI/UX</li>
+                        <li><strong>Dandi</strong> - Analisis Sistem & Konten MPK</li>
+                        <li><strong>Djusuf</strong> - Teknisi & Pengembang Backend</li>
+                    </ul>
+                    <p>D3+ didukung sepenuhnya oleh <strong>Majelis Perwakilan Kelas (MPK)</strong> untuk memberikan solusi terbaik bagi seluruh siswa.</p>
+                    <p>Tim D3+ berkomitmen untuk terus mengembangkan asisten virtual ini agar semakin bermanfaat bagi komunitas sekolah.</p>
+                </div>
+            `,
+            "pencipta d3+": `
+                <div class="creator-message">
+                    <h4>👥 Pencipta D3+ Asisten Virtual MPK</h4>
+                    <p><strong>D3+ diciptakan oleh:</strong></p>
+                    <ul>
+                        <li><strong>Dina</strong> - Pengembang Utama & Desainer UI/UX</li>
+                        <li><strong>Dandi</strong> - Analisis Sistem & Konten MPK</li>
+                        <li><strong>Djusuf</strong> - Teknisi & Pengembang Backend</li>
+                    </ul>
+                    <p>D3+ didukung sepenuhnya oleh <strong>Majelis Perwakilan Kelas (MPK)</strong> untuk memberikan solusi terbaik bagi seluruh siswa.</p>
+                </div>
+            `,
+            "pembuat d3+": `
+                <div class="creator-message">
+                    <h4>👥 Pencipta D3+ Asisten Virtual MPK</h4>
+                    <p><strong>D3+ diciptakan oleh:</strong></p>
+                    <ul>
+                        <li><strong>Dina</strong> - Pengembang Utama & Desainer UI/UX</li>
+                        <li><strong>Dandi</strong> - Analisis Sistem & Konten MPK</li>
+                        <li><strong>Djusuf</strong> - Teknisi & Pengembang Backend</li>
+                    </ul>
+                    <p>D3+ didukung sepenuhnya oleh <strong>Majelis Perwakilan Kelas (MPK)</strong> untuk memberikan solusi terbaik bagi seluruh siswa.</p>
+                </div>
+            `,
+            "dina dandi djusuf": `
+                <div class="creator-message">
+                    <h4>👥 Pencipta D3+ Asisten Virtual MPK</h4>
+                    <p><strong>D3+ diciptakan oleh:</strong></p>
+                    <ul>
+                        <li><strong>Dina</strong> - Pengembang Utama & Desainer UI/UX</li>
+                        <li><strong>Dandi</strong> - Analisis Sistem & Konten MPK</li>
+                        <li><strong>Djusuf</strong> - Teknisi & Pengembang Backend</li>
+                    </ul>
+                    <p>D3+ didukung sepenuhnya oleh <strong>Majelis Perwakilan Kelas (MPK)</strong> untuk memberikan solusi terbaik bagi seluruh siswa.</p>
+                </div>
+            `,
+            "default": `
+                <p>Selamat datang di Mode Anggota MPK! Anda dapat mengakses semua informasi khusus untuk pengurus MPK.</p>
+            `
+        };
+
+        // Informasi terbatas untuk user
+        const restrictedInfo = [
+            "cara sidang mpk", "cara rapat mpk", "tugas ketua mpk", "tugas wakil ketua mpk",
+            "cara membuat visi misi", "yang dilakukan saat pemilihan osis", "program kerja mpk",
+            "evaluasi mpk", "tata tertib mpk", "cara membuat proposal", "cara mengelola keuangan",
+            "cara dokumentasi kegiatan", "cara jadi bendahara mpk", "struktur mpk", 
+            "konsekuensi menyalahgunakan jabatan", "konsekuensi menyalahgunakan nama mpk",
+            "tugas sekretaris mpk", "tugas bendahara mpk", "tugas anggota mpk", "apa itu komisi mpk",
+            "jenis komisi mpk", "mekanisme pengambilan keputusan", "cara membuat laporan kegiatan",
+            "cara evaluasi program kerja", "peran mpk dalam pengambilan kebijakan", "hubungan mpk dengan osis"
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chat-container');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const actionBtns = document.querySelectorAll('.action-btn');
+            const userModeBtn = document.getElementById('user-mode');
+            const memberModeBtn = document.getElementById('member-mode');
+            const loginSection = document.getElementById('login-section');
+            const loginBtn = document.getElementById('login-btn');
+            const passwordInput = document.getElementById('password-input');
+            const userQuickActions = document.getElementById('user-quick-actions');
+            const memberFeatures = document.getElementById('member-features');
+            const calculatorSection = document.getElementById('calculator-section');
+            const calculatorTabs = document.querySelectorAll('.calculator-tab');
+            const calculatorContents = document.querySelectorAll('.calculator-content');
+            const aspirationBtn = document.getElementById('aspiration-btn');
+            const resetChatBtn = document.getElementById('reset-chat-btn');
+            const userSpecialButtons = document.getElementById('user-special-buttons');
+            
+            // Kalkulator Biasa
+            const basicCalculateBtn = document.getElementById('basic-calculate');
+            const basicResetBtn = document.getElementById('basic-reset');
+            const basicResult = document.getElementById('basic-result');
+            
+            // Kalkulator Bendahara
+            const calcCalculateBtn = document.getElementById('calc-calculate');
+            const calcResetBtn = document.getElementById('calc-reset');
+            const calcResult = document.getElementById('calc-result');
+
+            // Fungsi untuk menampilkan indikator mengetik
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator';
+                typingDiv.innerHTML = '<span></span><span></span><span></span>';
+                typingDiv.id = 'typing-indicator';
+                chatContainer.appendChild(typingDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            // Fungsi untuk menghilangkan indikator mengetik
+            function hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+
+            // Mode switching functionality
+            userModeBtn.addEventListener('click', function() {
+                currentMode = 'user';
+                userModeBtn.classList.add('active');
+                memberModeBtn.classList.remove('active');
+                loginSection.style.display = 'none';
+                userQuickActions.style.display = 'flex';
+                memberFeatures.style.display = 'none';
+                calculatorSection.style.display = 'none';
+                userSpecialButtons.style.display = 'block';
+                addMessage('Anda sekarang dalam Mode User. Informasi yang tersedia terbatas pada informasi umum MPK.', false);
+            });
+
+            memberModeBtn.addEventListener('click', function() {
+                if (!isLoggedIn) {
+                    loginSection.style.display = 'block';
+                    userSpecialButtons.style.display = 'none';
+                    addMessage('Silakan masukkan password untuk mengakses Mode Anggota MPK.', false);
+                } else {
+                    switchToMemberMode();
+                }
+            });
+
+            loginBtn.addEventListener('click', function() {
+                if (passwordInput.value === MEMBER_PASSWORD) {
+                    isLoggedIn = true;
+                    switchToMemberMode();
+                    addMessage('Login berhasil! Selamat datang di Mode Anggota MPK. Sekarang Anda dapat mengakses semua informasi khusus MPK.', false);
+                } else {
+                    alert('Password salah! Silakan coba lagi atau hubungi Tim Teknisi MPK jika Anda anggota MPK.');
+                    passwordInput.value = '';
+                }
+            });
+
+            function switchToMemberMode() {
+                currentMode = 'member';
+                userModeBtn.classList.remove('active');
+                memberModeBtn.classList.add('active');
+                loginSection.style.display = 'none';
+                userQuickActions.style.display = 'none';
+                memberFeatures.style.display = 'block';
+                calculatorSection.style.display = 'block';
+                userSpecialButtons.style.display = 'none';
+            }
+
+            // Fungsi untuk menambahkan pesan ke chat
+            function addMessage(message, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+                messageDiv.innerHTML = message;
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            // Fungsi untuk memproses pertanyaan
+            function processQuestion(question) {
+                addMessage(question, true);
+                
+                // Cek jika user mengetik kata sandi khusus
+                if (question.toLowerCase().includes('djusufabdulazizakseskhucus')) {
+                    showTypingIndicator();
+                    setTimeout(() => {
+                        hideTypingIndicator();
+                        addMessage(`
+                            <div class="password-message">
+                                <h4>🔑 Password untuk Mode Anggota MPK</h4>
+                                <p>Password: <strong>${MEMBER_PASSWORD}</strong></p>
+                                <p>Gunakan password ini untuk login di Mode Anggota MPK.</p>
+                            </div>
+                        `, false);
+                    }, 1000);
+                    return;
+                }
+                
+                // Cek jika user mencoba mengakses informasi terbatas
+                const questionLower = question.toLowerCase();
+                let isRestricted = false;
+                
+                for (const restricted of restrictedInfo) {
+                    if (questionLower.includes(restricted.toLowerCase())) {
+                        isRestricted = true;
+                        break;
+                    }
+                }
+                
+                if (currentMode === 'user' && isRestricted) {
+                    showTypingIndicator();
+                    setTimeout(() => {
+                        hideTypingIndicator();
+                        addMessage(`
+                            <div class="restricted-message">
+                                <h4>🚫 Akses Dibatasi</h4>
+                                <p>Maaf, informasi ini hanya tersedia untuk anggota MPK yang terdaftar.</p>
+                                <p>Silakan beralih ke <strong>Mode Anggota MPK</strong> dan login untuk mengakses informasi lengkap.</p>
+                                <p>Ketik "DjusufAbdulAzizAksesKhucus" untuk melihat password.</p>
+                            </div>
+                        `, false);
+                    }, 1000);
+                    return;
+                }
+                
+                // Cari jawaban yang sesuai
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    let response = '';
+                    
+                    if (currentMode === 'user') {
+                        // Cari pertanyaan yang cocok
+                        for (const key in userResponses) {
+                            if (questionLower.includes(key.toLowerCase())) {
+                                response = userResponses[key];
+                                break;
+                            }
+                        }
+                        if (!response) response = userResponses.default;
+                    } else {
+                        // Cari pertanyaan yang cocok
+                        for (const key in memberResponses) {
+                            if (questionLower.includes(key.toLowerCase())) {
+                                response = memberResponses[key];
+                                break;
+                            }
+                        }
+                        if (!response) response = memberResponses.default;
+                    }
+                    
+                    addMessage(response, false);
+                }, 1000);
+            }
+
+            // Event listener untuk tombol kirim
+            sendBtn.addEventListener('click', function() {
+                const question = userInput.value.trim();
+                if (question) {
+                    processQuestion(question);
+                    userInput.value = '';
+                }
+            });
+
+            // Event listener untuk input enter
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendBtn.click();
+                }
+            });
+
+            // Event listener untuk tombol aksi cepat
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const question = this.getAttribute('data-question');
+                    processQuestion(question);
+                });
+            });
+
+            // Event listener untuk tombol aspirasi
+            aspirationBtn.addEventListener('click', function() {
+                window.open('https://docs.google.com/forms/d/e/1FAIpQLSfXMv2Jg4cZm38xMcPjq2Mj-l1-znq-vXWHuc8LEURaPRBk-Q/viewform?usp=dialog', '_blank');
+                addMessage('Membuka formulir aspirasi MPK...', false);
+            });
+
+            // Event listener untuk tombol reset chat
+            resetChatBtn.addEventListener('click', function() {
+                chatContainer.innerHTML = '';
+                addMessage('Halo! Saya Asisten D3+. Silakan pilih mode di atas. Di Mode User, Anda bisa bertanya informasi umum seputar MPK. Di Mode Anggota, tersedia informasi lengkap untuk pengurus MPK.', false);
+            });
+
+            // Tab kalkulator
+            calculatorTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update tab aktif
+                    calculatorTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update konten aktif
+                    calculatorContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Format input uang otomatis
+            function formatCurrencyInput(input) {
+                // Hapus semua karakter non-digit
+                let value = input.value.replace(/\D/g, '');
+                
+                // Format dengan titik sebagai pemisah ribuan
+                if (value) {
+                    value = parseInt(value, 10).toLocaleString('id-ID');
+                    input.value = value;
+                } else {
+                    input.value = '';
+                }
+            }
+
+            // Event listener untuk input uang
+            const currencyInputs = document.querySelectorAll('.currency-input input');
+            currencyInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    formatCurrencyInput(this);
+                });
+                
+                // Format saat halaman dimuat
+                formatCurrencyInput(input);
+            });
+
+            // Kalkulator Biasa
+            basicCalculateBtn.addEventListener('click', function() {
+                const num1 = parseFloat(document.getElementById('basic-num1').value) || 0;
+                const num2 = parseFloat(document.getElementById('basic-num2').value) || 0;
+                const operation = document.getElementById('basic-operation').value;
+                
+                let result;
+                switch(operation) {
+                    case 'add':
+                        result = num1 + num2;
+                        break;
+                    case 'subtract':
+                        result = num1 - num2;
+                        break;
+                    case 'multiply':
+                        result = num1 * num2;
+                        break;
+                    case 'divide':
+                        result = num2 !== 0 ? num1 / num2 : 'Tidak dapat dibagi nol';
+                        break;
+                    default:
+                        result = 0;
+                }
+                
+                basicResult.textContent = `Hasil: ${result}`;
+            });
+
+            basicResetBtn.addEventListener('click', function() {
+                document.getElementById('basic-num1').value = '';
+                document.getElementById('basic-num2').value = '';
+                document.getElementById('basic-operation').value = 'add';
+                basicResult.textContent = 'Hasil: 0';
+            });
+
+            // Kalkulator Bendahara
+            calcCalculateBtn.addEventListener('click', function() {
+                const income = parseFloat(document.getElementById('calc-income').value.replace(/\./g, '')) || 0;
+                const expense = parseFloat(document.getElementById('calc-expense').value.replace(/\./g, '')) || 0;
+                const balance = parseFloat(document.getElementById('calc-balance').value.replace(/\./g, '')) || 0;
+                
+                const newBalance = balance + income - expense;
+                
+                calcResult.textContent = `Saldo: Rp ${newBalance.toLocaleString('id-ID')}`;
+            });
+
+            calcResetBtn.addEventListener('click', function() {
+                document.getElementById('calc-income').value = '';
+                document.getElementById('calc-expense').value = '';
+                document.getElementById('calc-balance').value = '';
+                calcResult.textContent = 'Saldo: Rp 0';
+                
+                // Format ulang input kosong
+                const currencyInputs = document.querySelectorAll('.currency-input input');
+                currencyInputs.forEach(input => {
+                    formatCurrencyInput(input);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
